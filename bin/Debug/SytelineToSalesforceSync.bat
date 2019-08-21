@@ -1,0 +1,4 @@
+C:\Users\belkb\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\TransferTSBrassSalesforce.exe 1 true
+C:\Users\belkb\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\TransferTSBrassSalesforce.exe 6 true
+C:\Users\belkb\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\TransferTSBrassSalesforce.exe 8 true
+C:\Users\belkb\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\TransferTSBrassSalesforce.exe 3 true

@@ -1,0 +1,32 @@
+C:\Users\ITCDev01\documents\visual studio 2017\Projects\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\TransferTSBrassSalesforce.exe.config
+C:\Users\ITCDev01\documents\visual studio 2017\Projects\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\TransferTSBrassSalesforce.exe
+C:\Users\ITCDev01\documents\visual studio 2017\Projects\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\TransferTSBrassSalesforce.pdb
+C:\Users\ITCDev01\documents\visual studio 2017\Projects\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\Integration_v2.dll
+C:\Users\ITCDev01\documents\visual studio 2017\Projects\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\WinSCPnet.dll
+C:\Users\ITCDev01\documents\visual studio 2017\Projects\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\Integration_v2.pdb
+C:\Users\ITCDev01\documents\visual studio 2017\Projects\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\Integration_v2.dll.config
+C:\Users\ITCDev01\documents\visual studio 2017\Projects\TransferTSBrassSalesforce\TransferTSBrassSalesforce\obj\Debug\TransferTSBrassSalesforce.csprojResolveAssemblyReference.cache
+C:\Users\ITCDev01\documents\visual studio 2017\Projects\TransferTSBrassSalesforce\TransferTSBrassSalesforce\obj\Debug\TransferTSBrassSalesforce.exe
+C:\Users\ITCDev01\documents\visual studio 2017\Projects\TransferTSBrassSalesforce\TransferTSBrassSalesforce\obj\Debug\TransferTSBrassSalesforce.pdb
+C:\Users\belkb\Documents\Visual Studio 2017\Projects\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\TransferTSBrassSalesforce.exe.config
+C:\Users\belkb\Documents\Visual Studio 2017\Projects\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\TransferTSBrassSalesforce.exe
+C:\Users\belkb\Documents\Visual Studio 2017\Projects\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\TransferTSBrassSalesforce.pdb
+C:\Users\belkb\Documents\Visual Studio 2017\Projects\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\Integration_v2.dll
+C:\Users\belkb\Documents\Visual Studio 2017\Projects\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\WinSCPnet.dll
+C:\Users\belkb\Documents\Visual Studio 2017\Projects\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\Integration_v2.pdb
+C:\Users\belkb\Documents\Visual Studio 2017\Projects\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\Integration_v2.dll.config
+C:\Users\belkb\Documents\Visual Studio 2017\Projects\TransferTSBrassSalesforce\TransferTSBrassSalesforce\obj\Debug\TransferTSBrassSalesforce.csprojResolveAssemblyReference.cache
+C:\Users\belkb\Documents\Visual Studio 2017\Projects\TransferTSBrassSalesforce\TransferTSBrassSalesforce\obj\Debug\TransferTSBrassSalesforce.exe
+C:\Users\belkb\Documents\Visual Studio 2017\Projects\TransferTSBrassSalesforce\TransferTSBrassSalesforce\obj\Debug\TransferTSBrassSalesforce.pdb
+C:\Users\belkb\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\TransferTSBrassSalesforce.exe.config
+C:\Users\belkb\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\TransferTSBrassSalesforce.exe
+C:\Users\belkb\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\TransferTSBrassSalesforce.pdb
+C:\Users\belkb\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\obj\Debug\TransferTSBrassSalesforce.csproj.CoreCompileInputs.cache
+C:\Users\belkb\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\obj\Debug\TransferTSBrassSalesforce.csproj.CopyComplete
+C:\Users\belkb\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\obj\Debug\TransferTSBrassSalesforce.exe
+C:\Users\belkb\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\obj\Debug\TransferTSBrassSalesforce.pdb
+C:\Users\belkb\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\obj\Debug\TransferTSBrassSalesforce.csprojAssemblyReference.cache
+C:\Users\belkb\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\Integration_v2.dll
+C:\Users\belkb\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\WinSCPnet.dll
+C:\Users\belkb\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\Integration_v2.pdb
+C:\Users\belkb\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\Integration_v2.dll.config
