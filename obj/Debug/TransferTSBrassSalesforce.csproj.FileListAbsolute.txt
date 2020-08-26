@@ -21,7 +21,6 @@ C:\Users\belkb\Documents\Visual Studio 2017\Projects\TransferTSBrassSalesforce\T
 C:\Users\belkb\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\TransferTSBrassSalesforce.exe.config
 C:\Users\belkb\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\TransferTSBrassSalesforce.exe
 C:\Users\belkb\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\TransferTSBrassSalesforce.pdb
-C:\Users\belkb\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\obj\Debug\TransferTSBrassSalesforce.csproj.CoreCompileInputs.cache
 C:\Users\belkb\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\obj\Debug\TransferTSBrassSalesforce.csproj.CopyComplete
 C:\Users\belkb\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\obj\Debug\TransferTSBrassSalesforce.exe
 C:\Users\belkb\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\obj\Debug\TransferTSBrassSalesforce.pdb

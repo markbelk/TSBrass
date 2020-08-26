@@ -36,8 +36,9 @@ namespace TransferTSBrassSalesforce
                     sfUserName,
                     sfPassword,
                     securityToken
-                    );
-                Transfer.SupportEmail supportEmail = new Transfer.SupportEmail(fromEmail, toEmails.Split(new char[] { ',' }).ToList(), Transfer.DecryptString(emailPassword));               
+                    );              
+                SupportEmail supportEmail = new SupportEmail();
+                supportEmail.ToEmails = toEmails.Split(new char[] { ',' }).ToList();
                 Program p = new Program(login, supportEmail, appId, connString);
                 p.interfacedSystemConnString = syteLineDbConnection;           
                 if (args.Length > 1) { p.EmailAppSummaryRpt = Convert.ToBoolean(args[1]); }
@@ -68,40 +69,10 @@ namespace TransferTSBrassSalesforce
                     AuthenticateToSalesforce(sfLogin.Username, sfLogin.Password, sfLogin.SecurityToken);
                     LoggedIntoSalesforce = true;
                 }
-
-                /*
-                //Build Soql Query Filter             
-                DateTime targetDate = LastRunDate.ToUniversalTime();
-                StringBuilder sbFilter = new StringBuilder();
-                if (Process.ToObjectName == "Prospect")
-                {
-                    // Prod - 
-                    sbFilter.AppendFormat("Where LastModifiedDate >= {0:yyyy-MM-ddThh:mm:ss.sssZ} And RecordTypeId='01241000001UVF8AAO' AND IsDeleted=false", targetDate);
-                    // Sandbox - sbFilter.AppendFormat("Where LastModifiedDate >= {0:yyyy-MM-ddThh:mm:ss.sssZ} And RecordTypeId='0125C000000IwFHQA0' AND IsDeleted=false", targetDate);				
-                }
-                else if (Process.ToObjectName == "Syteline Prospect Contact X Ref")
-                {
-                    sbFilter.AppendFormat("Where LastModifiedDate >= {0:yyyy-MM-ddThh:mm:ss.sssZ} AND IsDeleted=false", targetDate);
-                    sbFilter.Append(" AND Prospect_Contact_Row_Pointer__c = NULL");
-                    sbFilter.Append(" AND Account.Syteline_Prospect_Id__c != NULL");
-                }
-                else if (Process.ToObjectName == "Syteline Customer Contact X Ref")
-                {
-                    sbFilter.AppendFormat("Where LastModifiedDate >= {0:yyyy-MM-ddThh:mm:ss.sssZ} AND IsDeleted=false", targetDate);
-                    sbFilter.Append(" AND Customer_Contact_Row_Pointer__c = NULL");
-                    sbFilter.Append(" AND Account.Cust_Num__c != NULL");
-                }
-                else
-                {
-                    sbFilter.AppendFormat("Where LastModifiedDate >= {0:yyyy-MM-ddThh:mm:ss.sssZ} AND IsDeleted=false", targetDate);
-                }
-
-                */
-
+            
                 string soqlQueryFilter = BuildSoqlQueryFilter();
 
                 String soqlQuery = createSoqlQuery(Process.FromObjectName, SalesforceUrl, Process.FieldMappings, soqlQueryFilter);
-
 
                 //Get Query Results
                 sObject[] sObjects = Proxy.getQueryResults(soqlQuery, SalesforceSessionId, SalesforceUrl);   
@@ -157,7 +128,9 @@ namespace TransferTSBrassSalesforce
                     //send an email with error report attached	
                     if (dsErrors.Tables[0].Rows.Count > 0)
                     {
-                        SendErrorEmail(supportEmail, dsErrors.Tables[0], Process.ToObjectName, JobId);
+                        SfApiProxy proxy = new SfApiProxy();
+                        proxy.SendErrorEmail(supportEmail, dsErrors.Tables[0], Process.ToObjectName, JobId, SalesforceSessionId);
+                        //SendErrorEmail(supportEmail, dsErrors.Tables[0], Process.ToObjectName, JobId);
                     }
                 }
                 if (Process.EmailSuccessReport)
@@ -674,7 +647,7 @@ namespace TransferTSBrassSalesforce
 
         /// <summary>
         /// Checks that a relationship has been established with
-        /// either Syteline Customer or Prospect
+        /// either Syteline Customer, Prospect or Rep Agency
         /// </summary>
         /// <param name="xmlElements"></param>
         /// <returns></returns>
@@ -686,7 +659,7 @@ namespace TransferTSBrassSalesforce
                 {
                     foreach (XmlElement childElement in el)
                     {
-                        if (childElement.LocalName == "Syteline_Prospect_Id__c" || childElement.LocalName=="Cust_Num__c")
+                        if (childElement.LocalName == "Syteline_Prospect_Id__c" || childElement.LocalName=="Cust_Num__c" || childElement.LocalName== "SLSMan_EXT_ID__c")
                         {
                             if (childElement.InnerText != "")
                             {
@@ -922,19 +895,36 @@ namespace TransferTSBrassSalesforce
         }
         public string createSetStmt(List<FieldMapping> fieldMappings, sObject so)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder();          
             foreach (XmlElement el in so.Any)
-            {
+            {                      
                 foreach (FieldMapping fm in fieldMappings)
                 {
-                    if (el.LocalName.ToLower() == fm.FromField.Replace("[", "").Replace("]", "").ToLower())
+                    if (el.ChildNodes.Count > 1)
                     {
-                        //don't update id columns or unique identifiers
-                        if (fm.IsUnique || fm.DestFieldDataType == "uniqueidentifier")
-                        { continue; }
-                        //omit blank or null fields
-                        if (String.IsNullOrEmpty(el.InnerText)) { continue; }
-                        sb.AppendFormat("{0} = @{1},", fm.ToField, fm.ToField.Replace("[", "").Replace("]", ""));
+                       // if (el.LastChild.LocalName.ToLower() == fm.FromField.Replace("[", "").Replace("]", "").ToLower())
+                         if(fm.FromField.Replace("[", "").Replace("]", "").ToLower().Contains(el.LastChild.LocalName.ToLower()) && fm.ToField != "{PLACEHOLDER}")
+                        {
+                            //don't update id columns or unique identifiers
+                            if (fm.IsUnique || fm.DestFieldDataType == "uniqueidentifier")
+                            { continue; }
+                            //omit blank or null fields
+                            if (String.IsNullOrEmpty(el.LastChild.InnerText)) { continue; }
+                            sb.AppendFormat("{0} = @{1},", fm.ToField, fm.ToField.Replace("[", "").Replace("]", ""));
+                        }
+                    }
+                    else
+                    {
+                        if (el.LocalName.ToLower() == fm.FromField.Replace("[", "").Replace("]", "").ToLower())
+                        // if(fm.FromField.Replace("[", "").Replace("]", "").ToLower().Contains(el.LocalName.ToLower()))
+                        {
+                            //don't update id columns or unique identifiers
+                            if (fm.IsUnique || fm.DestFieldDataType == "uniqueidentifier")
+                            { continue; }
+                            //omit blank or null fields
+                            if (String.IsNullOrEmpty(el.InnerText)) { continue; }
+                            sb.AppendFormat("{0} = @{1},", fm.ToField, fm.ToField.Replace("[", "").Replace("]", ""));
+                        }
                     }
                 }
             }
@@ -989,16 +979,35 @@ namespace TransferTSBrassSalesforce
             {
                 foreach (FieldMapping fm in fieldMappings)
                 {
-                    if (el.LocalName.ToLower() == fm.FromField.Replace("[", "").Replace("]", "").ToLower())
+                    if (el.ChildNodes.Count > 1)
                     {
-                        if (String.IsNullOrEmpty(el.InnerText)) { continue; }
-                        if (fm.DestFieldDataType.ToLower() == "nvarchar" || fm.DestFieldDataType.ToLower() == "varchar")
+                        if ((fm.FromField.Replace("[", "").Replace("]", "").ToLower().Contains(el.LastChild.LocalName.ToLower()) && fm.ToField != "{PLACEHOLDER}") ||
+                            el.LocalName.ToLower() == fm.FromField.Replace("[", "").Replace("]", "").ToLower())
                         {
-                            sb.AppendFormat("@{0} {1}({2}),", fm.ToField.Replace("[", "").Replace("]", ""), fm.DestFieldDataType, Convert.ToString(fm.DestFieldLength) == "-1" ? "MAX" : fm.DestFieldLength.ToString());
+                            if (String.IsNullOrEmpty(el.LastChild.InnerText)) { continue; }
+                            if (fm.DestFieldDataType.ToLower() == "nvarchar" || fm.DestFieldDataType.ToLower() == "varchar")
+                            {
+                                sb.AppendFormat("@{0} {1}({2}),", fm.ToField.Replace("[", "").Replace("]", ""), fm.DestFieldDataType, Convert.ToString(fm.DestFieldLength) == "-1" ? "MAX" : fm.DestFieldLength.ToString());
+                            }
+                            else
+                            {
+                                sb.AppendFormat("@{0} {1},", fm.ToField.Replace("[", "").Replace("]", ""), fm.DestFieldDataType);
+                            }
                         }
-                        else
+                    }
+                    else
+                    {
+                        if (el.LocalName.ToLower() == fm.FromField.Replace("[", "").Replace("]", "").ToLower())
                         {
-                            sb.AppendFormat("@{0} {1},", fm.ToField.Replace("[", "").Replace("]", ""), fm.DestFieldDataType);
+                            if (String.IsNullOrEmpty(el.InnerText)) { continue; }
+                            if (fm.DestFieldDataType.ToLower() == "nvarchar" || fm.DestFieldDataType.ToLower() == "varchar")
+                            {
+                                sb.AppendFormat("@{0} {1}({2}),", fm.ToField.Replace("[", "").Replace("]", ""), fm.DestFieldDataType, Convert.ToString(fm.DestFieldLength) == "-1" ? "MAX" : fm.DestFieldLength.ToString());
+                            }
+                            else
+                            {
+                                sb.AppendFormat("@{0} {1},", fm.ToField.Replace("[", "").Replace("]", ""), fm.DestFieldDataType);
+                            }
                         }
                     }
                 }
@@ -1014,42 +1023,123 @@ namespace TransferTSBrassSalesforce
             {
                 foreach (FieldMapping fm in fieldMappings)
                 {
-                    //check to see if the Salesforce field is mapped
-                    if (el.LocalName.ToLower() == fm.FromField.Replace("[", "").Replace("]", "").ToLower())
+                    if (el.ChildNodes.Count > 1)
                     {
-                        if (String.IsNullOrEmpty(el.InnerText)) { continue; }
-                        //surround strings with single quotes
-                        if (fm.DestFieldDataType.ToLower() == "nvarchar" || fm.DestFieldDataType.ToLower() == "varchar"
-                            || fm.DestFieldDataType.ToLower() == "datetime" || fm.DestFieldDataType.ToLower() == "uniqueidentifier"
-                            || fm.DestFieldDataType.ToLower() == "nchar")
+                        //check to see if the Salesforce field is mapped
+                        //if (el.LocalName.ToLower() == fm.FromField.Replace("[", "").Replace("]", "").ToLower())
+                        if (fm.FromField.Replace("[", "").Replace("]", "").ToLower().Contains(el.LastChild.LocalName.ToLower()) && fm.ToField!="{PLACEHOLDER}")                         
                         {
-                            //generate a new guid if we are inserting
-                            if (fm.DestFieldDataType.ToLower() == "uniqueidentifier" && !isUpdate)
+                            if (String.IsNullOrEmpty(el.InnerText)) { continue; }
+                            //surround strings with single quotes
+                            if (fm.DestFieldDataType.ToLower() == "nvarchar" || fm.DestFieldDataType.ToLower() == "varchar"
+                                || fm.DestFieldDataType.ToLower() == "datetime" || fm.DestFieldDataType.ToLower() == "uniqueidentifier"
+                                || fm.DestFieldDataType.ToLower() == "nchar")
                             {
-                                sb.AppendFormat("@{0}=N'{1}',", fm.ToField.Replace("[", "").Replace("]", ""), Guid.NewGuid());
+                                //generate a new guid if we are inserting
+                                if (fm.DestFieldDataType.ToLower() == "uniqueidentifier" && !isUpdate)
+                                {
+                                    sb.AppendFormat("@{0}=N'{1}',", fm.ToField.Replace("[", "").Replace("]", ""), Guid.NewGuid());
+                                }
+                                else
+                                {
+                                    sb.AppendFormat("@{0}=N'{1}',", fm.ToField.Replace("[", "").Replace("]", ""), el.LastChild.InnerText.Replace("'", "''"));
+                                }
                             }
-                            else
+                            else//handling fields that don't require single quotes
                             {
-                                sb.AppendFormat("@{0}=N'{1}',", fm.ToField.Replace("[", "").Replace("]", ""), el.InnerText.Replace("'","''"));
+                                //convert true/false to tinyint
+                                if (fm.DestFieldDataType.ToLower() == "tinyint")
+                                {
+                                    if (el.InnerText.ToLower() == "false")
+                                    {
+                                        sb.AppendFormat("@{0}={1},", fm.ToField.Replace("[", "").Replace("]", ""), 0);
+                                    }
+                                    else if (el.InnerText.ToLower() == "true")
+                                    {
+                                        sb.AppendFormat("@{0}={1},", fm.ToField.Replace("[", "").Replace("]", ""), 1);
+                                    }
+                                    else { sb.AppendFormat("@{0}={1},", fm.ToField.Replace("[", "").Replace("]", ""), el.LastChild.InnerText); }
+
+                                }
+                                else { sb.AppendFormat("@{0}={1},", fm.ToField.Replace("[", "").Replace("]", ""), el.LastChild.InnerText); }
                             }
                         }
-                        else//handling fields that don't require single quotes
-                        {
-                            //convert true/false to tinyint
-                            if (fm.DestFieldDataType.ToLower() == "tinyint")
+                        else if (el.LocalName.ToLower() == fm.FromField.Replace("[", "").Replace("]", "").ToLower()){
+                            if (String.IsNullOrEmpty(el.InnerText)) { continue; }
+                            //surround strings with single quotes
+                            if (fm.DestFieldDataType.ToLower() == "nvarchar" || fm.DestFieldDataType.ToLower() == "varchar"
+                                || fm.DestFieldDataType.ToLower() == "datetime" || fm.DestFieldDataType.ToLower() == "uniqueidentifier"
+                                || fm.DestFieldDataType.ToLower() == "nchar")
                             {
-                                if (el.InnerText.ToLower() == "false")
+                                //generate a new guid if we are inserting
+                                if (fm.DestFieldDataType.ToLower() == "uniqueidentifier" && !isUpdate)
                                 {
-                                    sb.AppendFormat("@{0}={1},", fm.ToField.Replace("[", "").Replace("]", ""), 0);
+                                    sb.AppendFormat("@{0}=N'{1}',", fm.ToField.Replace("[", "").Replace("]", ""), Guid.NewGuid());
                                 }
-                                else if (el.InnerText.ToLower() == "true")
+                                else
                                 {
-                                    sb.AppendFormat("@{0}={1},", fm.ToField.Replace("[", "").Replace("]", ""), 1);
+                                    sb.AppendFormat("@{0}=N'{1}',", fm.ToField.Replace("[", "").Replace("]", ""), el.InnerText.Replace("'", "''"));
+                                }
+                            }
+                            else//handling fields that don't require single quotes
+                            {
+                                //convert true/false to tinyint
+                                if (fm.DestFieldDataType.ToLower() == "tinyint")
+                                {
+                                    if (el.InnerText.ToLower() == "false")
+                                    {
+                                        sb.AppendFormat("@{0}={1},", fm.ToField.Replace("[", "").Replace("]", ""), 0);
+                                    }
+                                    else if (el.InnerText.ToLower() == "true")
+                                    {
+                                        sb.AppendFormat("@{0}={1},", fm.ToField.Replace("[", "").Replace("]", ""), 1);
+                                    }
+                                    else { sb.AppendFormat("@{0}={1},", fm.ToField.Replace("[", "").Replace("]", ""), el.InnerText); }
+
                                 }
                                 else { sb.AppendFormat("@{0}={1},", fm.ToField.Replace("[", "").Replace("]", ""), el.InnerText); }
-
                             }
-                            else { sb.AppendFormat("@{0}={1},", fm.ToField.Replace("[", "").Replace("]", ""), el.InnerText); }
+                        }
+                    }
+                    else
+                    {
+                        //check to see if the Salesforce field is mapped
+                        if (el.LocalName.ToLower() == fm.FromField.Replace("[", "").Replace("]", "").ToLower())                     
+                        {
+                            if (String.IsNullOrEmpty(el.InnerText)) { continue; }
+                            //surround strings with single quotes
+                            if (fm.DestFieldDataType.ToLower() == "nvarchar" || fm.DestFieldDataType.ToLower() == "varchar"
+                                || fm.DestFieldDataType.ToLower() == "datetime" || fm.DestFieldDataType.ToLower() == "uniqueidentifier"
+                                || fm.DestFieldDataType.ToLower() == "nchar")
+                            {
+                                //generate a new guid if we are inserting
+                                if (fm.DestFieldDataType.ToLower() == "uniqueidentifier" && !isUpdate)
+                                {
+                                    sb.AppendFormat("@{0}=N'{1}',", fm.ToField.Replace("[", "").Replace("]", ""), Guid.NewGuid());
+                                }
+                                else
+                                {
+                                    sb.AppendFormat("@{0}=N'{1}',", fm.ToField.Replace("[", "").Replace("]", ""), el.InnerText.Replace("'", "''"));
+                                }
+                            }
+                            else//handling fields that don't require single quotes
+                            {
+                                //convert true/false to tinyint
+                                if (fm.DestFieldDataType.ToLower() == "tinyint")
+                                {
+                                    if (el.InnerText.ToLower() == "false")
+                                    {
+                                        sb.AppendFormat("@{0}={1},", fm.ToField.Replace("[", "").Replace("]", ""), 0);
+                                    }
+                                    else if (el.InnerText.ToLower() == "true")
+                                    {
+                                        sb.AppendFormat("@{0}={1},", fm.ToField.Replace("[", "").Replace("]", ""), 1);
+                                    }
+                                    else { sb.AppendFormat("@{0}={1},", fm.ToField.Replace("[", "").Replace("]", ""), el.InnerText); }
+
+                                }
+                                else { sb.AppendFormat("@{0}={1},", fm.ToField.Replace("[", "").Replace("]", ""), el.InnerText); }
+                            }
                         }
                     }
                 }
@@ -1144,29 +1234,57 @@ namespace TransferTSBrassSalesforce
             StringBuilder sbFilter = new StringBuilder();
             if (Process.ToObjectName == "Prospect")
             {               
-                sbFilter.AppendFormat("Where LastModifiedDate >= {0:yyyy-MM-ddThh:mm:ss.sssZ} And Account.RecordType.Name = 'Prospect' AND IsDeleted=false", targetDate);              				
+                sbFilter.AppendFormat("Where LastModifiedDate >= {0:yyyy-MM-ddTHH:mm:ss.fffZ} And Account.RecordType.Name = 'Prospect' AND IsDeleted=false", targetDate);
+               // sbFilter.Append(" Where Id = '0014M00001kHiHQQA0'");
             }
             else if (Process.ToObjectName == "Syteline Prospect Contact X Ref")
             {
-                sbFilter.AppendFormat("Where LastModifiedDate >= {0:yyyy-MM-ddThh:mm:ss.sssZ} AND IsDeleted=false", targetDate);
+                // sbFilter.AppendFormat("Where LastModifiedDate >= {0:yyyy-MM-ddThh:mm:ss.fffZ} AND IsDeleted=false", targetDate);
+                sbFilter.Append("Where IsDeleted=false");
                 sbFilter.Append(" AND Account.Prospect__c != NULL");
                 sbFilter.Append(" AND Contact.Contact__c != NULL");
                 sbFilter.Append(" AND Syteline_RowPointer__c = NULL");
             }
-            else if (Process.ToObjectName == "Syteline Customer Contact X Ref" || Process.ToObjectName == "Syteline Salesperson Contact X Ref")
+            else if (Process.ToObjectName == "Syteline Customer Contact X Ref")
             {
-                sbFilter.AppendFormat("Where LastModifiedDate >= {0:yyyy-MM-ddThh:mm:ss.sssZ} AND IsDeleted=false", targetDate);               
+                // sbFilter.AppendFormat("Where LastModifiedDate >= {0:yyyy-MM-ddThh:mm:ss.fffZ} AND IsDeleted=false", targetDate);
+                sbFilter.Append("Where IsDeleted=false");
                 sbFilter.Append(" AND Account.Cust_Num__c != NULL");
                 sbFilter.Append(" AND Contact.Contact__c != NULL");
                 sbFilter.Append(" AND Syteline_RowPointer__c = NULL");
+                sbFilter.Append(" AND Account.RecordType.Name = 'Customer'");
             }
         
             else
             {
-                sbFilter.AppendFormat("Where LastModifiedDate >= {0:yyyy-MM-ddThh:mm:ss.sssZ} AND IsDeleted=false", targetDate);
+                sbFilter.AppendFormat("Where LastModifiedDate >= {0:yyyy-MM-ddTHH:mm:ss.fffZ} AND IsDeleted=false", targetDate);
             }
        
             return sbFilter.ToString();
+        }
+
+        public override bool shouldProcessColumn(FieldMapping fm, string value)
+        {
+            bool shouldProcess = true;
+            //omit null or blank numeric, date and date/time, master-detail columnd
+            if (fm.DestFieldDataType.ToLower() == "number" && value.Trim() == "") { return false; }
+            else if (fm.DestFieldDataType.ToLower() == "currency" && value.Trim() == "") { return false; }
+            else if (fm.DestFieldDataType.ToLower() == "percent" && value.Trim() == "") { return false; }
+            else if (fm.DestFieldDataType.ToLower() == "date")
+            {
+                if (value.Trim() == "") { return false; }
+                // else if (Convert.ToDateTime(value) == new DateTime(1900, 1, 1)) { return false; }
+                else if (value.Trim() == "1/1/1900 12:00:00 AM") { return false; }
+
+            }
+            else if (fm.DestFieldDataType.ToLower() == "date/time" && value.Trim() == "") { return false; }
+            else if (fm.DestFieldDataType.ToLower() == "master-detail" && value.Trim() == "") { return false; }
+            else if (fm.DestFieldDataType.ToLower() == "lookup" && value.Trim() == "") { return false; }
+            else if (fm.DestFieldDataType.ToLower() == "text" && value.Trim() == "")
+            {               
+                return false;
+            }
+            return shouldProcess;
         }
 
         //ToDo: create a function that queries the AccountContactRelation table
