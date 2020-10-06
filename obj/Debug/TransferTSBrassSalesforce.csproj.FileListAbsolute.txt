@@ -29,3 +29,15 @@ C:\Users\belkb\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesf
 C:\Users\belkb\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\WinSCPnet.dll
 C:\Users\belkb\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\Integration_v2.pdb
 C:\Users\belkb\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\Integration_v2.dll.config
+C:\Users\belkb\OneDrive\Documents\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\TransferTSBrassSalesforce.exe.config
+C:\Users\belkb\OneDrive\Documents\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\TransferTSBrassSalesforce.exe
+C:\Users\belkb\OneDrive\Documents\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\TransferTSBrassSalesforce.pdb
+C:\Users\belkb\OneDrive\Documents\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\WinSCPnet.dll
+C:\Users\belkb\OneDrive\Documents\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\Integration_v2.pdb
+C:\Users\belkb\OneDrive\Documents\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\Integration_v2.dll.config
+C:\Users\belkb\OneDrive\Documents\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\obj\Debug\TransferTSBrassSalesforce.csprojAssemblyReference.cache
+C:\Users\belkb\OneDrive\Documents\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\obj\Debug\TransferTSBrassSalesforce.csproj.CoreCompileInputs.cache
+C:\Users\belkb\OneDrive\Documents\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\obj\Debug\TransferTSBrassSalesforce.csproj.CopyComplete
+C:\Users\belkb\OneDrive\Documents\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\obj\Debug\TransferTSBrassSalesforce.exe
+C:\Users\belkb\OneDrive\Documents\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\obj\Debug\TransferTSBrassSalesforce.pdb
+C:\Users\belkb\OneDrive\Documents\Source\Workspaces\Workspace\ClientSolutions\TransferTSBrassSalesforce\TransferTSBrassSalesforce\bin\Debug\Integration_v2.dll

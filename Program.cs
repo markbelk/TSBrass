@@ -899,24 +899,36 @@ namespace TransferTSBrassSalesforce
             foreach (XmlElement el in so.Any)
             {                      
                 foreach (FieldMapping fm in fieldMappings)
-                {
+                {   if (fm.ToField == "{PLACEHOLDER}") { continue; }
+                    string fromField= fm.FromField.Replace("[", "").Replace("]", "");
+                    string toField = fm.ToField.Replace("[", "").Replace("]", "");
                     if (el.ChildNodes.Count > 1)
-                    {
-                       // if (el.LastChild.LocalName.ToLower() == fm.FromField.Replace("[", "").Replace("]", "").ToLower())
-                         if(fm.FromField.Replace("[", "").Replace("]", "").ToLower().Contains(el.LastChild.LocalName.ToLower()) && fm.ToField != "{PLACEHOLDER}")
-                        {
-                            //don't update id columns or unique identifiers
-                            if (fm.IsUnique || fm.DestFieldDataType == "uniqueidentifier")
-                            { continue; }
-                            //omit blank or null fields
-                            if (String.IsNullOrEmpty(el.LastChild.InnerText)) { continue; }
-                            sb.AppendFormat("{0} = @{1},", fm.ToField, fm.ToField.Replace("[", "").Replace("]", ""));
-                        }
+                    {                                       
+                        //check for a field name that includes .notation, eg. 'Account.Name'
+                       if (fm.FromField.Contains("."))
+                        {   //if so check to see if it matches the element Local Name
+                            string fieldMappingObjectName = fm.FromField.Substring(0, fm.FromField.IndexOf("."));
+                            string fieldMappingFieldName = fm.FromField.Substring(fm.FromField.IndexOf(".") + 1);
+                            if (el.LocalName == fieldMappingObjectName)
+                            {
+                                foreach(XmlNode childNode in el.ChildNodes)
+                                {
+                                    if (childNode.LocalName == fieldMappingFieldName)
+                                    {
+                                        //don't update id columns or unique identifiers
+                                        if (fm.IsUnique || fm.DestFieldDataType == "uniqueidentifier")
+                                        { continue; }
+                                        //omit blank or null fields
+                                        if (String.IsNullOrEmpty(childNode.InnerText)) { continue; }
+                                        sb.AppendFormat("{0} = @{1},", fm.ToField, toField);
+                                    }
+                                }
+                            }
+                        }                 
                     }
                     else
                     {
-                        if (el.LocalName.ToLower() == fm.FromField.Replace("[", "").Replace("]", "").ToLower())
-                        // if(fm.FromField.Replace("[", "").Replace("]", "").ToLower().Contains(el.LocalName.ToLower()))
+                        if (el.LocalName.ToLower() == fm.FromField.Replace("[", "").Replace("]", "").ToLower())                    
                         {
                             //don't update id columns or unique identifiers
                             if (fm.IsUnique || fm.DestFieldDataType == "uniqueidentifier")
@@ -979,37 +991,48 @@ namespace TransferTSBrassSalesforce
             {
                 foreach (FieldMapping fm in fieldMappings)
                 {
-                    if (el.ChildNodes.Count > 1)
-                    {
-                        if ((fm.FromField.Replace("[", "").Replace("]", "").ToLower().Contains(el.LastChild.LocalName.ToLower()) && fm.ToField != "{PLACEHOLDER}") ||
-                            el.LocalName.ToLower() == fm.FromField.Replace("[", "").Replace("]", "").ToLower())
+                    if(fm.ToField == "{PLACEHOLDER}"){ continue; }
+                        if (el.ChildNodes.Count > 1 && fm.FromField.Contains("."))
+                        {                       
+                            //if (fm.FromField.Contains("."))
+                          //  {   //if so check to see if it matches the element Local Name
+                                string fieldMappingObjectName = fm.FromField.Substring(0, fm.FromField.IndexOf("."));
+                                string fieldMappingFieldName = fm.FromField.Substring(fm.FromField.IndexOf(".") + 1);
+                                if (el.LocalName == fieldMappingObjectName)
+                                {
+                                    foreach (XmlNode childNode in el.ChildNodes)
+                                    {
+                                        if (childNode.LocalName == fieldMappingFieldName)
+                                        {
+                                            if (String.IsNullOrEmpty(childNode.InnerText)) { continue; }
+                                            if (fm.DestFieldDataType.ToLower() == "nvarchar" || fm.DestFieldDataType.ToLower() == "varchar")
+                                            {
+                                                sb.AppendFormat("@{0} {1}({2}),", fm.ToField.Replace("[", "").Replace("]", ""), fm.DestFieldDataType, Convert.ToString(fm.DestFieldLength) == "-1" ? "MAX" : fm.DestFieldLength.ToString());
+                                            }
+                                            else
+                                            {
+                                                sb.AppendFormat("@{0} {1},", fm.ToField.Replace("[", "").Replace("]", ""), fm.DestFieldDataType);
+                                            }
+                                        }
+                                    }
+                                }
+                           // }
+                        }
+                        else
                         {
-                            if (String.IsNullOrEmpty(el.LastChild.InnerText)) { continue; }
-                            if (fm.DestFieldDataType.ToLower() == "nvarchar" || fm.DestFieldDataType.ToLower() == "varchar")
+                            if (el.LocalName.ToLower() == fm.FromField.Replace("[", "").Replace("]", "").ToLower())
                             {
-                                sb.AppendFormat("@{0} {1}({2}),", fm.ToField.Replace("[", "").Replace("]", ""), fm.DestFieldDataType, Convert.ToString(fm.DestFieldLength) == "-1" ? "MAX" : fm.DestFieldLength.ToString());
-                            }
-                            else
-                            {
-                                sb.AppendFormat("@{0} {1},", fm.ToField.Replace("[", "").Replace("]", ""), fm.DestFieldDataType);
+                                if (String.IsNullOrEmpty(el.InnerText)) { continue; }
+                                if (fm.DestFieldDataType.ToLower() == "nvarchar" || fm.DestFieldDataType.ToLower() == "varchar")
+                                {
+                                    sb.AppendFormat("@{0} {1}({2}),", fm.ToField.Replace("[", "").Replace("]", ""), fm.DestFieldDataType, Convert.ToString(fm.DestFieldLength) == "-1" ? "MAX" : fm.DestFieldLength.ToString());
+                                }
+                                else
+                                {
+                                    sb.AppendFormat("@{0} {1},", fm.ToField.Replace("[", "").Replace("]", ""), fm.DestFieldDataType);
+                                }
                             }
                         }
-                    }
-                    else
-                    {
-                        if (el.LocalName.ToLower() == fm.FromField.Replace("[", "").Replace("]", "").ToLower())
-                        {
-                            if (String.IsNullOrEmpty(el.InnerText)) { continue; }
-                            if (fm.DestFieldDataType.ToLower() == "nvarchar" || fm.DestFieldDataType.ToLower() == "varchar")
-                            {
-                                sb.AppendFormat("@{0} {1}({2}),", fm.ToField.Replace("[", "").Replace("]", ""), fm.DestFieldDataType, Convert.ToString(fm.DestFieldLength) == "-1" ? "MAX" : fm.DestFieldLength.ToString());
-                            }
-                            else
-                            {
-                                sb.AppendFormat("@{0} {1},", fm.ToField.Replace("[", "").Replace("]", ""), fm.DestFieldDataType);
-                            }
-                        }
-                    }
                 }
             }
             sb.Remove(sb.Length - 1, 1);         
@@ -1023,85 +1046,62 @@ namespace TransferTSBrassSalesforce
             {
                 foreach (FieldMapping fm in fieldMappings)
                 {
-                    if (el.ChildNodes.Count > 1)
+                    if (fm.ToField == "{PLACEHOLDER}") { continue; }
+                    //string fromField = fm.FromField.Replace("[", "").Replace("]", "");
+                    //string toField = fm.ToField.Replace("[", "").Replace("]", "");
+                    if (el.ChildNodes.Count > 1 && fm.FromField.Contains("."))
                     {
-                        //check to see if the Salesforce field is mapped
-                        //if (el.LocalName.ToLower() == fm.FromField.Replace("[", "").Replace("]", "").ToLower())
-                        if (fm.FromField.Replace("[", "").Replace("]", "").ToLower().Contains(el.LastChild.LocalName.ToLower()) && fm.ToField!="{PLACEHOLDER}")                         
-                        {
-                            if (String.IsNullOrEmpty(el.InnerText)) { continue; }
-                            //surround strings with single quotes
-                            if (fm.DestFieldDataType.ToLower() == "nvarchar" || fm.DestFieldDataType.ToLower() == "varchar"
-                                || fm.DestFieldDataType.ToLower() == "datetime" || fm.DestFieldDataType.ToLower() == "uniqueidentifier"
-                                || fm.DestFieldDataType.ToLower() == "nchar")
+                        //check for .noted field names, eg. 'Account.Name'
+                        //if (fm.FromField.Contains("."))
+                        //{   //if so check to see if it matches the element Local Name
+                            string fieldMappingObjectName = fm.FromField.Substring(0, fm.FromField.IndexOf("."));
+                            string fieldMappingFieldName = fm.FromField.Substring(fm.FromField.IndexOf(".") + 1);
+                            if (el.LocalName == fieldMappingObjectName)
                             {
-                                //generate a new guid if we are inserting
-                                if (fm.DestFieldDataType.ToLower() == "uniqueidentifier" && !isUpdate)
+                                foreach (XmlNode childNode in el.ChildNodes)
                                 {
-                                    sb.AppendFormat("@{0}=N'{1}',", fm.ToField.Replace("[", "").Replace("]", ""), Guid.NewGuid());
-                                }
-                                else
-                                {
-                                    sb.AppendFormat("@{0}=N'{1}',", fm.ToField.Replace("[", "").Replace("]", ""), el.LastChild.InnerText.Replace("'", "''"));
-                                }
-                            }
-                            else//handling fields that don't require single quotes
-                            {
-                                //convert true/false to tinyint
-                                if (fm.DestFieldDataType.ToLower() == "tinyint")
-                                {
-                                    if (el.InnerText.ToLower() == "false")
+                                    if (childNode.LocalName == fieldMappingFieldName)
                                     {
-                                        sb.AppendFormat("@{0}={1},", fm.ToField.Replace("[", "").Replace("]", ""), 0);
-                                    }
-                                    else if (el.InnerText.ToLower() == "true")
-                                    {
-                                        sb.AppendFormat("@{0}={1},", fm.ToField.Replace("[", "").Replace("]", ""), 1);
-                                    }
-                                    else { sb.AppendFormat("@{0}={1},", fm.ToField.Replace("[", "").Replace("]", ""), el.LastChild.InnerText); }
+                                        if (String.IsNullOrEmpty(childNode.InnerText)) { continue; }
+                                        //surround strings with single quotes
+                                        if (fm.DestFieldDataType.ToLower() == "nvarchar" || fm.DestFieldDataType.ToLower() == "varchar"
+                                            || fm.DestFieldDataType.ToLower() == "datetime" || fm.DestFieldDataType.ToLower() == "uniqueidentifier"
+                                            || fm.DestFieldDataType.ToLower() == "nchar")
+                                        {
+                                            //generate a new guid if we are inserting
+                                            if (fm.DestFieldDataType.ToLower() == "uniqueidentifier" && !isUpdate)
+                                            {
+                                                sb.AppendFormat("@{0}=N'{1}',", fm.ToField.Replace("[", "").Replace("]", ""), Guid.NewGuid());
+                                            }
+                                            else
+                                            {
+                                                sb.AppendFormat("@{0}=N'{1}',", fm.ToField.Replace("[", "").Replace("]", ""), childNode.InnerText.Replace("'", "''"));
+                                            }
+                                        }
+                                        else//handling fields that don't require single quotes
+                                        {
+                                            //convert true/false to tinyint
+                                            if (fm.DestFieldDataType.ToLower() == "tinyint")
+                                            {
+                                                if (childNode.InnerText.ToLower() == "false")
+                                                {
+                                                    sb.AppendFormat("@{0}={1},", fm.ToField.Replace("[", "").Replace("]", ""), 0);
+                                                }
+                                                else if (childNode.InnerText.ToLower() == "true")
+                                                {
+                                                    sb.AppendFormat("@{0}={1},", fm.ToField.Replace("[", "").Replace("]", ""), 1);
+                                                }
+                                                else { sb.AppendFormat("@{0}={1},", fm.ToField.Replace("[", "").Replace("]", ""), childNode.InnerText); }
 
-                                }
-                                else { sb.AppendFormat("@{0}={1},", fm.ToField.Replace("[", "").Replace("]", ""), el.LastChild.InnerText); }
-                            }
-                        }
-                        else if (el.LocalName.ToLower() == fm.FromField.Replace("[", "").Replace("]", "").ToLower()){
-                            if (String.IsNullOrEmpty(el.InnerText)) { continue; }
-                            //surround strings with single quotes
-                            if (fm.DestFieldDataType.ToLower() == "nvarchar" || fm.DestFieldDataType.ToLower() == "varchar"
-                                || fm.DestFieldDataType.ToLower() == "datetime" || fm.DestFieldDataType.ToLower() == "uniqueidentifier"
-                                || fm.DestFieldDataType.ToLower() == "nchar")
-                            {
-                                //generate a new guid if we are inserting
-                                if (fm.DestFieldDataType.ToLower() == "uniqueidentifier" && !isUpdate)
-                                {
-                                    sb.AppendFormat("@{0}=N'{1}',", fm.ToField.Replace("[", "").Replace("]", ""), Guid.NewGuid());
-                                }
-                                else
-                                {
-                                    sb.AppendFormat("@{0}=N'{1}',", fm.ToField.Replace("[", "").Replace("]", ""), el.InnerText.Replace("'", "''"));
-                                }
-                            }
-                            else//handling fields that don't require single quotes
-                            {
-                                //convert true/false to tinyint
-                                if (fm.DestFieldDataType.ToLower() == "tinyint")
-                                {
-                                    if (el.InnerText.ToLower() == "false")
-                                    {
-                                        sb.AppendFormat("@{0}={1},", fm.ToField.Replace("[", "").Replace("]", ""), 0);
+                                            }
+                                            else { sb.AppendFormat("@{0}={1},", fm.ToField.Replace("[", "").Replace("]", ""), childNode.InnerText); }
+                                        }
                                     }
-                                    else if (el.InnerText.ToLower() == "true")
-                                    {
-                                        sb.AppendFormat("@{0}={1},", fm.ToField.Replace("[", "").Replace("]", ""), 1);
-                                    }
-                                    else { sb.AppendFormat("@{0}={1},", fm.ToField.Replace("[", "").Replace("]", ""), el.InnerText); }
-
                                 }
-                                else { sb.AppendFormat("@{0}={1},", fm.ToField.Replace("[", "").Replace("]", ""), el.InnerText); }
                             }
-                        }
+                      //  }
                     }
-                    else
+                    else//handle non .notated field names, eg. 'Name'
                     {
                         //check to see if the Salesforce field is mapped
                         if (el.LocalName.ToLower() == fm.FromField.Replace("[", "").Replace("]", "").ToLower())                     
